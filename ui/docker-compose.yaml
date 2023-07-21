@@ -1,0 +1,29 @@
+version: "3"
+services:
+headscale-webui:
+image: ifargle/headscale-webui:latest
+container_name: headscale-webui
+networks:
+mynet:
+ipv4_address: 172.20.0.2
+environment:
+- TZ=Asia/Shanghai
+- COLOR=blue-gray # Use the base colors
+- HS_SERVER=http://172.20.0.1:8090 # Headscale server 注意，ip是headscle容器的而不是宿主的！否则连接会出错！
+- DOMAIN_NAME=https://hscale.domain.com # npm反向代理后的域名，必须要先设置好！
+- SCRIPT_NAME=/admin # applications base path 管理路径
+- KEY="tPosHiEni60fXnyxxxxxNCUE362pexAlDzPxxxxLqKpo=" # 用于保存写盘时加密，与headscale的api-key不同的。
+- AUTH_TYPE=Basic #使用 Basic 登录验证方式
+- LOG_LEVEL=info
+# 以下是使用 Basic Auth 验证时的变量：
+- BASIC_AUTH_USER=admin # Used for basic auth
+- BASIC_AUTH_PASS=xxxxxxx # Used for basic auth
+volumes:
+- /docker/headscale-webui:/data:rw # 注意权限！要先 chown 1000:1000 /docker/headscale-webui，不然会出错。
+- /docker/headscale/conf/:/etc/headscale/:ro # 这映射Headscale容器的配置文件位置
+ports:
+- 127.0.0.1:5050:5000 #因为用了反代，所以不用0.0.0.0:5050
+restart: always
+networks:
+mynet:
+external: true
