@@ -1,1 +1,23 @@
-
+version: '3.6'
+services:
+headscale:
+image: headscale/headscale:latest
+container_name: headscale
+networks:
+mynet: #在下面网络部分那里声明是存在的网络名。
+ipv4_address: 172.20.0.1 #只有先有（存在）了的网络，才能指定ip地址。
+volumes:
+- /docker/headscale/conf:/etc/headscale
+- /docker/headscale/data:/var/lib/headscale
+ports:
+- 8090:8090 # 因为8080端口已被占用，改成：8090:8090。
+command: headscale serve
+restart: always
+cap_add:
+- NET_ADMIN
+- SYS_MODULE
+sysctls:
+- net.ipv4.ip_forward=1
+networks:
+mynet: # 网络名
+external: true # 此处声明上面指定的网络名mynet是已经存在的网络
